@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import EditIcon from './components/icons/EditIcon.vue'
 import DeleteIcon from './components/icons/DeleteIcon.vue'
-import { reactive } from 'vue'
 import axios from 'axios'
+import { onMounted, ref } from 'vue'
 
 import {
   Table,
@@ -14,22 +14,17 @@ import {
   TableRow
 } from '@/shadcnComponents/ui/table'
 
-const task = reactive({
-  id: 0,
-  title: '',
-  description: '',
-  dueDate: '',
-  status: ''
+const axiosClient = axios.create({
+  baseURL: 'http://localhost:8080/api/v1' // Reemplaza con la URL de tu API
 })
 
-const axiosClient = axios.create({
-  baseURL: 'localhost:808/api/v1' // Reemplaza con la URL de tu API
-})
+let task = ref({})
 
 const getTasks = async () => {
   try {
     const response = await axiosClient.get('/tasks')
-    task.data = response.data
+    task.value = response.data
+    console.log(task.value)
   } catch (error) {
     console.error(error)
   }
@@ -61,6 +56,10 @@ const deleteTask = async (taskId) => {
     console.error(error)
   }
 }
+
+onMounted(() => {
+  getTasks()
+})
 </script>
 
 <template>
@@ -78,12 +77,12 @@ const deleteTask = async (taskId) => {
       </TableRow>
     </TableHeader>
     <TableBody>
-      <TableRow v-for="tasks in task.data" :key="tasks.id">
-        <TableCell class="font-medium"> {{ tasks.id }} </TableCell>
-        <TableCell>{{ tasks.title }}</TableCell>
-        <TableCell>{{ tasks.description }}</TableCell>
-        <TableCell class="text-right"> {{ tasks.dueDate }} </TableCell>
-        <TableCell class="text-left"> {{ tasks.status }} </TableCell>
+      <TableRow v-for="{ id, title, description, dueDate, status } in task" :key="id">
+        <TableCell class="font-medium"> {{ id }} </TableCell>
+        <TableCell>{{ title }}</TableCell>
+        <TableCell>{{ description }}</TableCell>
+        <TableCell class="text-right"> {{ dueDate }} </TableCell>
+        <TableCell class="text-left"> {{ status }} </TableCell>
         <TableCell>
           <div class="flex flex-row justify-evenly">
             <EditIcon></EditIcon>
